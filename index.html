@@ -133,7 +133,7 @@
 
 <div class="raster">
   <section class="panel">
-    <h2>📊 Trading <span class="demo-badge">DEMO</span></h2>
+    <h2>📊 Trading <span class="demo-badge" id="demoBadge">DEMO</span></h2>
     <div class="konto">
       <div class="label">Kontostand</div>
       <div class="wert" id="kontostand"></div>
@@ -165,6 +165,12 @@
     <h2>📋 Nächste Schritte</h2>
     <div id="schritteListe"></div>
   </section>
+</div>
+
+<div style="text-align:center; margin:1.4rem 0 .4rem;">
+  <a href="privat.html" style="display:inline-block; padding:.7rem 1.4rem; border:1px solid var(--cyan);
+     border-radius:.7rem; color:var(--cyan); text-decoration:none; font-weight:600; font-size:.9rem;">
+     🔒 Private Ansicht (echte Zahlen)</a>
 </div>
 
 <footer>STAND: <span id="stand"></span> · WIRD VON JARVIS GEPFLEGT</footer>
@@ -213,18 +219,35 @@ const el = id => document.getElementById(id);
 el("stand").textContent = DATEN.stand;
 
 // ---- Trading ----
-const t = DATEN.trading;
-const eur = n => n.toLocaleString("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 const proz = n => (n >= 0 ? "+" : "") + n.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
 const farbe = n => n >= 0 ? "gruen" : "rot";
-el("kontostand").textContent = eur(t.kontostand);
-el("kontoHeute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
-el("rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
-el("anzahl").textContent = t.anzahlPositionen;
 const posZeile = (titel, p) =>
-  `<div class="pos"><div><div class="name">${titel}: ${p.name}</div><div class="sub">${p.sub}</div></div>` +
+  `<div class="pos"><div><div class="name">${titel}: ${p.name}</div><div class="sub">${p.sub || ""}</div></div>` +
   `<div class="pct ${farbe(p.pct)}">${proz(p.pct)}</div></div>`;
-el("posListe").innerHTML = posZeile("🏆 Beste", t.beste) + posZeile("📉 Schwächste", t.schlechteste);
+
+function zeigeTrading(t) {
+  const waehrung = t.waehrung || "EUR";
+  const geld = n => n.toLocaleString("de-DE", { style: "currency", currency: waehrung, maximumFractionDigits: 0 });
+  el("kontostand").textContent = geld(t.kontostand);
+  el("kontoHeute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
+  el("rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
+  el("anzahl").textContent = t.anzahlPositionen;
+  el("posListe").innerHTML = posZeile("🏆 Beste", t.beste) + posZeile("📉 Schwächste", t.schlechteste);
+  // Echte Daten? Dann das gelbe DEMO-Schild gegen ein grünes LIVE-Schild tauschen.
+  const badge = el("demoBadge");
+  if (t.demo === false) {
+    badge.textContent = "PAPER · LIVE";
+    badge.style.color = "var(--ok)";
+    badge.style.borderColor = "var(--ok)";
+  }
+}
+
+// Erst Demo zeigen, dann versuchen, die echten Paper-Zahlen zu laden (nur lokal vorhanden).
+zeigeTrading(DATEN.trading);
+fetch("trading-live.json", { cache: "no-store" })
+  .then(r => r.ok ? r.json() : null)
+  .then(live => { if (live) zeigeTrading(live); })
+  .catch(() => {});
 
 el("statusListe").innerHTML = DATEN.status.map(s =>
   `<div class="zeile"><span><span class="punkt ${s.zustand}"></span>${s.name}</span><span class="l">${s.info}</span></div>`

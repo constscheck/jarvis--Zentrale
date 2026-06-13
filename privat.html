@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060b14">
+<title>J.A.R.V.I.S. – Privat</title>
+<style>
+  :root { --bg:#060b14; --panel:#0c1626; --line:#15324d; --cyan:#35d6ff; --cyan-dim:#1a8db3;
+    --text:#d7e9f5; --dim:#6b8aa3; --ok:#3ddc84; --warn:#ffb454; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:radial-gradient(ellipse at 50% -20%, #0d2238 0%, var(--bg) 60%);
+    color:var(--text); font-family:"Avenir Next","Helvetica Neue",system-ui,sans-serif;
+    min-height:100vh; min-height:100dvh; }
+
+  /* Login */
+  .tor { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:1.5rem; text-align:center; }
+  .reaktor { width:64px; height:64px; border-radius:50%; border:2px solid var(--cyan);
+    position:relative; box-shadow:0 0 24px rgba(53,214,255,.55), inset 0 0 18px rgba(53,214,255,.45);
+    animation:puls 3s ease-in-out infinite; margin-bottom:1.2rem; }
+  .reaktor::after { content:""; position:absolute; inset:14px; border-radius:50%;
+    border:1.5px solid var(--cyan-dim); box-shadow:inset 0 0 12px rgba(53,214,255,.7); }
+  @keyframes puls { 50% { box-shadow:0 0 40px rgba(53,214,255,.9), inset 0 0 24px rgba(53,214,255,.7); } }
+  .tor h1 { font-size:1.2rem; letter-spacing:.3em; color:var(--cyan); margin-bottom:.4rem; }
+  .tor p { color:var(--dim); font-size:.85rem; margin-bottom:1.4rem; }
+  .tor input { width:100%; max-width:18rem; padding:.9rem 1rem; font-size:1.1rem; text-align:center;
+    background:#0a1422; border:1px solid var(--line); border-radius:.7rem; color:var(--text); }
+  .tor input:focus { outline:2px solid var(--cyan); border-color:transparent; }
+  .tor button { width:100%; max-width:18rem; margin-top:.8rem; padding:.9rem; font-size:1.05rem;
+    font-weight:700; background:var(--cyan); color:#04141c; border:none; border-radius:.7rem; cursor:pointer; }
+  .tor .fehler { color:#ff5d6c; font-size:.85rem; margin-top:.9rem; min-height:1.2rem; }
+
+  /* Dashboard (versteckt bis entsperrt) */
+  #app { display:none; padding:0 0 2rem; }
+  header { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:.7rem;
+    padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; background:rgba(6,11,20,.88);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  header .mini { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--cyan); position:relative;
+    box-shadow:0 0 12px rgba(53,214,255,.5); flex:none; }
+  header .mini::after { content:""; position:absolute; inset:7px; border-radius:50%; border:1px solid var(--cyan-dim); }
+  header h1 { font-size:1rem; letter-spacing:.22em; color:var(--cyan); }
+  header .stand { margin-left:auto; font-size:.62rem; color:var(--dim); text-align:right; }
+
+  .panel { background:linear-gradient(180deg, rgba(53,214,255,.05), rgba(0,0,0,0) 30%), var(--panel);
+    border:1px solid var(--line); border-radius:1.1rem; margin:.8rem; padding:1rem; }
+  .panel h2 { font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--cyan);
+    border-bottom:1px solid var(--line); padding-bottom:.55rem; margin-bottom:.8rem; }
+  .badge { float:right; font-size:.6rem; letter-spacing:.15em; color:var(--ok);
+    border:1px solid var(--ok); border-radius:.35rem; padding:.1rem .4rem; }
+  .konto { text-align:center; padding:.4rem 0 1rem; }
+  .konto .label { color:var(--dim); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; }
+  .konto .wert { font-size:2.4rem; font-weight:700; margin-top:.2rem; }
+  .konto .heute { font-size:.95rem; margin-top:.3rem; }
+  .gruen { color:var(--ok); } .rot { color:#ff5d6c; }
+  .kennzahlen { display:flex; gap:.6rem; margin-bottom:.6rem; }
+  .kennzahlen .box { flex:1; background:#0a1422; border:1px solid var(--line); border-radius:.7rem;
+    padding:.6rem .7rem; text-align:center; }
+  .kennzahlen .box .k-label { color:var(--dim); font-size:.68rem; }
+  .kennzahlen .box .k-wert { font-size:1.15rem; font-weight:700; margin-top:.2rem; }
+  .pos { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0;
+    border-bottom:1px dashed rgba(21,50,77,.6); }
+  .pos:last-child { border-bottom:none; }
+  .pos .name { font-weight:600; } .pos .pct { font-weight:700; font-size:1.05rem; }
+</style>
+</head>
+<body>
+  <div class="tor" id="tor">
+    <div class="reaktor"></div>
+    <h1>J.A.R.V.I.S.</h1>
+    <p>Private Ansicht · bitte Passwort eingeben</p>
+    <input id="pw" type="password" inputmode="text" placeholder="Passwort" autocomplete="current-password">
+    <button id="btn">🔓 Entsperren</button>
+    <div class="fehler" id="fehler"></div>
+  </div>
+
+  <div id="app">
+    <header>
+      <div class="mini"></div>
+      <h1>DEPOT</h1>
+      <div class="stand" id="stand"></div>
+    </header>
+    <section class="panel">
+      <h2>📊 Trading <span class="badge">PAPER · LIVE</span></h2>
+      <div class="konto">
+        <div class="label">Kontostand</div>
+        <div class="wert" id="kontostand"></div>
+        <div class="heute" id="kontoHeute"></div>
+      </div>
+      <div class="kennzahlen">
+        <div class="box"><div class="k-label">Gesamt-Rendite</div><div class="k-wert" id="rendite"></div></div>
+        <div class="box"><div class="k-label">Positionen</div><div class="k-wert" id="anzahl"></div></div>
+      </div>
+      <div id="posListe"></div>
+    </section>
+  </div>
+
+<script>
+const ITER = 200000; // muss mit tresor-bauen.py übereinstimmen
+const $ = id => document.getElementById(id);
+const b64ToBytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function entsperren() {
+  $("fehler").textContent = "";
+  const pw = $("pw").value;
+  if (!pw) { $("fehler").textContent = "Bitte Passwort eingeben."; return; }
+  try {
+    const tresor = await (await fetch("tresor.json", { cache: "no-store" })).json();
+    const salt = b64ToBytes(tresor.salt), iv = b64ToBytes(tresor.iv), ct = b64ToBytes(tresor.ct);
+    const basis = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw),
+      "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt, iterations: tresor.iter || ITER, hash: "SHA-256" },
+      basis, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const klar = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+    const t = JSON.parse(new TextDecoder().decode(klar));
+    zeige(t);
+  } catch (e) {
+    $("fehler").textContent = "Falsches Passwort oder noch keine Daten hinterlegt.";
+  }
+}
+
+function zeige(t) {
+  const proz = n => (n >= 0 ? "+" : "") + n.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+  const farbe = n => n >= 0 ? "gruen" : "rot";
+  const geld = n => n.toLocaleString("de-DE", { style: "currency", currency: t.waehrung || "EUR", maximumFractionDigits: 0 });
+  const posZeile = (titel, p) =>
+    `<div class="pos"><div><div class="name">${titel}: ${p.name}</div></div><div class="pct ${farbe(p.pct)}">${proz(p.pct)}</div></div>`;
+  $("kontostand").textContent = geld(t.kontostand);
+  $("kontoHeute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
+  $("rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
+  $("anzahl").textContent = t.anzahlPositionen;
+  $("posListe").innerHTML = posZeile("🏆 Beste", t.beste) + posZeile("📉 Schwächste", t.schlechteste);
+  $("stand").textContent = t.aktualisiert ? "Stand " + t.aktualisiert : "";
+  $("tor").style.display = "none";
+  $("app").style.display = "block";
+}
+
+$("btn").addEventListener("click", entsperren);
+$("pw").addEventListener("keydown", e => { if (e.key === "Enter") entsperren(); });
+</script>
+</body>
+</html>
