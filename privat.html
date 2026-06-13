@@ -67,6 +67,22 @@
   .aufgabe .kasten { width:1.1rem; height:1.1rem; border:1.5px solid var(--cyan-dim); border-radius:.3rem; flex:none; }
   .aufgabe.erledigt .kasten { background:var(--ok); border-color:var(--ok); }
   .aufgabe.erledigt span { text-decoration:line-through; color:var(--dim); }
+  /* Tagesplan bearbeiten */
+  .termin .termin-titel { flex:1; }
+  .termin .del, .aufgabe .del { margin-left:auto; background:none; border:none; color:var(--dim); font-size:1.2rem; line-height:1; cursor:pointer; padding:0 .3rem; }
+  .termin .del:active, .aufgabe .del:active { color:var(--rot); }
+  .aufgabe { cursor:pointer; }
+  .aufgabe span { flex:1; }
+  .fokus-in { width:100%; background:#0a1422; border:1px solid var(--line); border-radius:.6rem; color:var(--text); padding:.65rem; font-size:.92rem; margin-bottom:.7rem; }
+  .plan-eingabe { display:flex; gap:.4rem; margin-top:.8rem; flex-wrap:wrap; }
+  .plan-eingabe input, .plan-eingabe select { background:#0a1422; border:1px solid var(--line); border-radius:.6rem; color:var(--text); padding:.6rem; font-size:.95rem; }
+  .plan-eingabe .zeit-in { width:6rem; }
+  .plan-eingabe .titel-in { flex:1; min-width:7rem; }
+  .plan-eingabe .art-in { width:6rem; }
+  .plan-eingabe .add { background:var(--cyan); color:#04141c; border:none; font-weight:700; font-size:1.1rem; border-radius:.6rem; padding:.5rem .95rem; cursor:pointer; }
+  .plan-leer { color:var(--dim); font-size:.86rem; padding:.4rem 0; }
+  .tag-leeren { background:none; border:1px solid var(--line); color:var(--dim); border-radius:.6rem; padding:.45rem .8rem; font-size:.78rem; cursor:pointer; margin-top:.8rem; }
+  .datum-badge { float:right; font-size:.6rem; letter-spacing:.05em; color:var(--dim); border:1px solid var(--line); border-radius:.35rem; padding:.1rem .4rem; }
 
   /* Weltlage */
   .markt { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.4rem; }
@@ -103,7 +119,7 @@
     <div class="reaktor"></div>
     <h1>J.A.R.V.I.S.</h1>
     <p>Private Ansicht · bitte Passwort eingeben</p>
-    <input id="pw" type="password" placeholder="Passwort" autocomplete="current-password">
+    <input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
     <button id="btn">🔓 Entsperren</button>
     <div class="fehler" id="fehler"></div>
   </div>
@@ -140,8 +156,32 @@
 
     <!-- TAGESPLAN -->
     <section class="view" data-view="plan">
-      <div class="panel"><h2>🗓️ Tagesplan</h2><div class="dim" id="p-fokus" style="margin-bottom:.6rem;font-size:.86rem"></div><div id="p-termine"></div></div>
-      <div class="panel"><h2>✅ Aufgaben</h2><div id="p-aufgaben"></div></div>
+      <div class="panel">
+        <h2>🗓️ Tagesplan <span class="datum-badge" id="p-datum"></span></h2>
+        <input class="fokus-in" id="p-fokus-in" placeholder="Fokus / Motto für heute…">
+        <div id="p-termine"></div>
+        <div class="plan-eingabe">
+          <input class="zeit-in" id="neu-zeit" type="time">
+          <input class="titel-in" id="neu-titel" placeholder="Was steht an?">
+          <select class="art-in" id="neu-art">
+            <option value="termin">Termin</option>
+            <option value="fokus">Fokus</option>
+            <option value="routine">Routine</option>
+            <option value="pause">Pause</option>
+            <option value="frei">Frei</option>
+          </select>
+          <button class="add" id="neu-termin-add">+</button>
+        </div>
+        <button class="tag-leeren" id="tag-leeren">🗑️ Tag leeren</button>
+      </div>
+      <div class="panel">
+        <h2>✅ Aufgaben</h2>
+        <div id="p-aufgaben"></div>
+        <div class="plan-eingabe">
+          <input class="titel-in" id="neu-aufgabe" placeholder="Neue Aufgabe…">
+          <button class="add" id="neu-aufgabe-add">+</button>
+        </div>
+      </div>
     </section>
 
     <!-- WELTLAGE -->
@@ -181,6 +221,34 @@ let DATEN = {};
 
 const proz = n => (n >= 0 ? "+" : "") + Number(n).toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1}) + " %";
 const farbe = n => n >= 0 ? "gruen" : "rot";
+const escapeHtml = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const heuteDatum = () => new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+
+/* ---------- Mein Tagesplan (von mir selbst bearbeitbar, im Handy gespeichert) ---------- */
+let meinPlan = null;
+function planLaden() {
+  const gespeichert = localStorage.getItem("jarvis_plan");
+  if (gespeichert) { try { return JSON.parse(gespeichert); } catch {} }
+  if (DATEN.plan) return JSON.parse(JSON.stringify(DATEN.plan));   // Startvorlage aus Jarvis
+  return { datum: heuteDatum(), fokus: "", termine: [], aufgaben: [] };
+}
+function planSpeichern() { localStorage.setItem("jarvis_plan", JSON.stringify(meinPlan)); }
+function planRendern() {
+  if (!meinPlan) meinPlan = planLaden();
+  meinPlan.termine.sort((a,b) => String(a.zeit||"").localeCompare(String(b.zeit||"")));
+  $("p-datum").textContent = meinPlan.datum || heuteDatum();
+  if (document.activeElement !== $("p-fokus-in")) $("p-fokus-in").value = meinPlan.fokus || "";
+  $("p-termine").innerHTML = meinPlan.termine.length ? meinPlan.termine.map((x,i) =>
+    `<div class="termin art-${x.art||''}"><div class="zeit">${escapeHtml(x.zeit)}</div><div class="termin-titel">${escapeHtml(x.titel)}</div><button class="del" data-i="${i}">×</button></div>`).join("")
+    : '<div class="plan-leer">Noch keine Termine – unten eintragen.</div>';
+  $("p-aufgaben").innerHTML = meinPlan.aufgaben.length ? meinPlan.aufgaben.map((a,i) =>
+    `<div class="aufgabe ${a.erledigt?'erledigt':''}" data-i="${i}"><div class="kasten"></div><span>${escapeHtml(a.text)}</span><button class="del" data-i="${i}">×</button></div>`).join("")
+    : '<div class="plan-leer">Noch keine Aufgaben.</div>';
+  const naechste = meinPlan.termine.slice(0,3).map(x =>
+    `<div class="termin"><div class="zeit">${escapeHtml(x.zeit)}</div><div>${escapeHtml(x.titel)}</div></div>`).join("");
+  $("u-heute-plan").innerHTML = (meinPlan.fokus ? `<div class="dim" style="margin-bottom:.5rem;font-size:.85rem">${escapeHtml(meinPlan.fokus)}</div>` : "")
+    + (naechste || '<div class="plan-leer">Noch nichts geplant.</div>');
+}
 
 /* ---------- Entsperren ---------- */
 async function entsperren() {
@@ -216,17 +284,8 @@ function rendern() {
     $("t-pos").innerHTML = pz("🏆 Beste", t.beste) + pz("📉 Schwächste", t.schlechteste);
     $("stand").textContent = t.aktualisiert ? "Stand "+t.aktualisiert : "";
   }
-  if (p) {
-    $("p-fokus").textContent = p.fokus || "";
-    $("p-termine").innerHTML = (p.termine||[]).map(x =>
-      `<div class="termin art-${x.art||''}"><div class="zeit">${x.zeit}</div><div>${x.titel}</div></div>`).join("");
-    const auf = (p.aufgaben||[]).map(a =>
-      `<div class="aufgabe ${a.erledigt?'erledigt':''}"><div class="kasten"></div><span>${a.text}</span></div>`).join("");
-    $("p-aufgaben").innerHTML = auf || '<div class="dim">Keine Aufgaben.</div>';
-    // Übersicht: nächster Termin + Fokus
-    const naechste = (p.termine||[]).slice(0,3).map(x=>`<div class="termin"><div class="zeit">${x.zeit}</div><div>${x.titel}</div></div>`).join("");
-    $("u-heute-plan").innerHTML = (p.fokus?`<div class="dim" style="margin-bottom:.5rem;font-size:.85rem">${p.fokus}</div>`:"") + naechste;
-  }
+  meinPlan = planLaden();
+  planRendern();
   if (w) {
     const m = w.maerkte||{};
     $("w-markt").innerHTML = [["S&P 500",m.sp500],["Nasdaq",m.nasdaq],["Dow",m.dow],["Bitcoin",m.bitcoin]]
@@ -314,6 +373,55 @@ $("btn").addEventListener("click", entsperren);
 $("pw").addEventListener("keydown", e => { if (e.key==="Enter") entsperren(); });
 $("chatSend").addEventListener("click", fragen);
 $("chatInput").addEventListener("keydown", e => { if (e.key==="Enter") fragen(); });
+
+/* ---------- Tagesplan: Bedienung ---------- */
+function terminHinzufuegen() {
+  if (!meinPlan) return;
+  const titel = $("neu-titel").value.trim();
+  if (!titel) { $("neu-titel").focus(); return; }
+  meinPlan.termine.push({ zeit: $("neu-zeit").value || "", titel, art: $("neu-art").value });
+  $("neu-zeit").value = ""; $("neu-titel").value = "";
+  planSpeichern(); planRendern();
+}
+function aufgabeHinzufuegen() {
+  if (!meinPlan) return;
+  const text = $("neu-aufgabe").value.trim();
+  if (!text) return;
+  meinPlan.aufgaben.push({ text, erledigt: false });
+  $("neu-aufgabe").value = "";
+  planSpeichern(); planRendern();
+}
+$("neu-termin-add").addEventListener("click", terminHinzufuegen);
+$("neu-titel").addEventListener("keydown", e => { if (e.key==="Enter") terminHinzufuegen(); });
+$("neu-aufgabe-add").addEventListener("click", aufgabeHinzufuegen);
+$("neu-aufgabe").addEventListener("keydown", e => { if (e.key==="Enter") aufgabeHinzufuegen(); });
+$("p-fokus-in").addEventListener("input", e => {
+  if (!meinPlan) return;
+  meinPlan.fokus = e.target.value;
+  planSpeichern();
+});
+$("p-termine").addEventListener("click", e => {
+  const del = e.target.closest(".del");
+  if (!del || !meinPlan) return;
+  meinPlan.termine.splice(+del.dataset.i, 1);
+  planSpeichern(); planRendern();
+});
+$("p-aufgaben").addEventListener("click", e => {
+  if (!meinPlan) return;
+  const del = e.target.closest(".del");
+  if (del) { meinPlan.aufgaben.splice(+del.dataset.i, 1); planSpeichern(); planRendern(); return; }
+  const row = e.target.closest(".aufgabe");
+  if (row) {
+    const i = +row.dataset.i;
+    meinPlan.aufgaben[i].erledigt = !meinPlan.aufgaben[i].erledigt;
+    planSpeichern(); planRendern();
+  }
+});
+$("tag-leeren").addEventListener("click", () => {
+  if (!confirm("Den ganzen Tagesplan leeren?")) return;
+  meinPlan = { datum: heuteDatum(), fokus: "", termine: [], aufgaben: [] };
+  planSpeichern(); planRendern();
+});
 </script>
 </body>
 </html>
