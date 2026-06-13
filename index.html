@@ -62,6 +62,27 @@
   .agent-name { font-weight: 600; }
   .agent-desc { color: var(--dim); font-size: .8rem; margin-top: .15rem; }
   .status-chips { display: contents; }
+
+  /* ---- Trading-Panel ---- */
+  .demo-badge { float: right; font-size: .6rem; letter-spacing: .15em; color: var(--warn);
+    border: 1px solid var(--warn); border-radius: .35rem; padding: .1rem .4rem; }
+  .konto { text-align: center; padding: .4rem 0 1rem; }
+  .konto .label { color: var(--dim); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; }
+  .konto .wert { font-size: 2.2rem; font-weight: 700; color: var(--text); margin-top: .2rem; letter-spacing: .01em; }
+  .konto .heute { font-size: .9rem; margin-top: .3rem; }
+  .gruen { color: var(--ok); }
+  .rot { color: #ff5d6c; }
+  .kennzahlen { display: flex; gap: .6rem; margin-bottom: .6rem; }
+  .kennzahlen .box { flex: 1; background: #0a1422; border: 1px solid var(--line);
+    border-radius: .7rem; padding: .6rem .7rem; text-align: center; }
+  .kennzahlen .box .k-label { color: var(--dim); font-size: .68rem; letter-spacing: .08em; }
+  .kennzahlen .box .k-wert { font-size: 1.1rem; font-weight: 700; margin-top: .2rem; }
+  .pos { display: flex; justify-content: space-between; align-items: center; padding: .55rem 0;
+    border-bottom: 1px dashed rgba(21,50,77,.6); }
+  .pos:last-child { border-bottom: none; }
+  .pos .name { font-weight: 600; }
+  .pos .sub { color: var(--dim); font-size: .75rem; }
+  .pos .pct { font-weight: 700; font-size: 1rem; white-space: nowrap; }
   footer { text-align: center; color: var(--dim); font-size: .75rem; margin-top: 1.6rem; letter-spacing: .08em; }
 
   /* ============ HANDY-ANSICHT (eigenes, kompaktes App-Layout) ============ */
@@ -112,6 +133,20 @@
 
 <div class="raster">
   <section class="panel">
+    <h2>📊 Trading <span class="demo-badge">DEMO</span></h2>
+    <div class="konto">
+      <div class="label">Kontostand</div>
+      <div class="wert" id="kontostand"></div>
+      <div class="heute" id="kontoHeute"></div>
+    </div>
+    <div class="kennzahlen">
+      <div class="box"><div class="k-label">Gesamt-Rendite</div><div class="k-wert" id="rendite"></div></div>
+      <div class="box"><div class="k-label">Positionen</div><div class="k-wert" id="anzahl"></div></div>
+    </div>
+    <div id="posListe"></div>
+  </section>
+
+  <section class="panel">
     <h2>⚡ System-Status</h2>
     <div id="statusListe" class="status-chips"></div>
   </section>
@@ -144,6 +179,17 @@
    ============================================================ */
 const DATEN = {
   stand: "11.06.2026",
+  // ⚠️ DEMO-Zahlen. Echte Finanzdaten kommen später in die passwortgeschützte Version,
+  //    NIEMALS hier in die öffentliche Online-Seite.
+  trading: {
+    demo: true,
+    kontostand: 24850,           // Euro
+    heuteProzent: 1.8,           // Veränderung heute in %
+    renditeProzent: 12.4,        // Gesamt-Rendite seit Start in %
+    anzahlPositionen: 7,
+    beste:    { name: "NVIDIA",  sub: "NVDA",    pct: 34.2 },
+    schlechteste: { name: "Bayer", sub: "BAYN", pct: -11.5 }
+  },
   status: [
     { name: "Grundgerüst", zustand: "ok",   info: "eingerichtet" },
     { name: "Handy-Verbindung (ntfy)", zustand: "warn", info: "noch einrichten" },
@@ -165,6 +211,20 @@ const DATEN = {
 
 const el = id => document.getElementById(id);
 el("stand").textContent = DATEN.stand;
+
+// ---- Trading ----
+const t = DATEN.trading;
+const eur = n => n.toLocaleString("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const proz = n => (n >= 0 ? "+" : "") + n.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+const farbe = n => n >= 0 ? "gruen" : "rot";
+el("kontostand").textContent = eur(t.kontostand);
+el("kontoHeute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
+el("rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
+el("anzahl").textContent = t.anzahlPositionen;
+const posZeile = (titel, p) =>
+  `<div class="pos"><div><div class="name">${titel}: ${p.name}</div><div class="sub">${p.sub}</div></div>` +
+  `<div class="pct ${farbe(p.pct)}">${proz(p.pct)}</div></div>`;
+el("posListe").innerHTML = posZeile("🏆 Beste", t.beste) + posZeile("📉 Schwächste", t.schlechteste);
 
 el("statusListe").innerHTML = DATEN.status.map(s =>
   `<div class="zeile"><span><span class="punkt ${s.zustand}"></span>${s.name}</span><span class="l">${s.info}</span></div>`
