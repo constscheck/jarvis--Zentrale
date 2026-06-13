@@ -6,64 +6,96 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#060b14">
-<title>J.A.R.V.I.S. – Privat</title>
+<title>J.A.R.V.I.S.</title>
 <style>
   :root { --bg:#060b14; --panel:#0c1626; --line:#15324d; --cyan:#35d6ff; --cyan-dim:#1a8db3;
-    --text:#d7e9f5; --dim:#6b8aa3; --ok:#3ddc84; --warn:#ffb454; }
+    --text:#d7e9f5; --dim:#6b8aa3; --ok:#3ddc84; --warn:#ffb454; --rot:#ff5d6c; }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { background:radial-gradient(ellipse at 50% -20%, #0d2238 0%, var(--bg) 60%);
     color:var(--text); font-family:"Avenir Next","Helvetica Neue",system-ui,sans-serif;
     min-height:100vh; min-height:100dvh; }
+  .gruen{color:var(--ok)} .rot{color:var(--rot)} .dim{color:var(--dim)}
 
   /* Login */
-  .tor { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; padding:1.5rem; text-align:center; }
-  .reaktor { width:64px; height:64px; border-radius:50%; border:2px solid var(--cyan);
-    position:relative; box-shadow:0 0 24px rgba(53,214,255,.55), inset 0 0 18px rgba(53,214,255,.45);
-    animation:puls 3s ease-in-out infinite; margin-bottom:1.2rem; }
-  .reaktor::after { content:""; position:absolute; inset:14px; border-radius:50%;
-    border:1.5px solid var(--cyan-dim); box-shadow:inset 0 0 12px rgba(53,214,255,.7); }
+  .tor { min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; text-align:center; }
+  .reaktor { width:64px; height:64px; border-radius:50%; border:2px solid var(--cyan); position:relative;
+    box-shadow:0 0 24px rgba(53,214,255,.55), inset 0 0 18px rgba(53,214,255,.45); animation:puls 3s ease-in-out infinite; margin-bottom:1.2rem; }
+  .reaktor::after { content:""; position:absolute; inset:14px; border-radius:50%; border:1.5px solid var(--cyan-dim); box-shadow:inset 0 0 12px rgba(53,214,255,.7); }
   @keyframes puls { 50% { box-shadow:0 0 40px rgba(53,214,255,.9), inset 0 0 24px rgba(53,214,255,.7); } }
   .tor h1 { font-size:1.2rem; letter-spacing:.3em; color:var(--cyan); margin-bottom:.4rem; }
   .tor p { color:var(--dim); font-size:.85rem; margin-bottom:1.4rem; }
-  .tor input { width:100%; max-width:18rem; padding:.9rem 1rem; font-size:1.1rem; text-align:center;
-    background:#0a1422; border:1px solid var(--line); border-radius:.7rem; color:var(--text); }
+  input, textarea { font-family:inherit; }
+  .tor input { width:100%; max-width:18rem; padding:.9rem 1rem; font-size:1.1rem; text-align:center; background:#0a1422; border:1px solid var(--line); border-radius:.7rem; color:var(--text); }
   .tor input:focus { outline:2px solid var(--cyan); border-color:transparent; }
-  .tor button { width:100%; max-width:18rem; margin-top:.8rem; padding:.9rem; font-size:1.05rem;
-    font-weight:700; background:var(--cyan); color:#04141c; border:none; border-radius:.7rem; cursor:pointer; }
-  .tor .fehler { color:#ff5d6c; font-size:.85rem; margin-top:.9rem; min-height:1.2rem; }
+  .tor button { width:100%; max-width:18rem; margin-top:.8rem; padding:.9rem; font-size:1.05rem; font-weight:700; background:var(--cyan); color:#04141c; border:none; border-radius:.7rem; cursor:pointer; }
+  .tor .fehler { color:var(--rot); font-size:.85rem; margin-top:.9rem; min-height:1.2rem; }
 
-  /* Dashboard (versteckt bis entsperrt) */
-  #app { display:none; padding:0 0 2rem; }
+  /* App-Gerüst */
+  #app { display:none; padding-bottom:5rem; }
   header { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:.7rem;
-    padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; background:rgba(6,11,20,.88);
-    backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
-  header .mini { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--cyan); position:relative;
-    box-shadow:0 0 12px rgba(53,214,255,.5); flex:none; }
-  header .mini::after { content:""; position:absolute; inset:7px; border-radius:50%; border:1px solid var(--cyan-dim); }
-  header h1 { font-size:1rem; letter-spacing:.22em; color:var(--cyan); }
-  header .stand { margin-left:auto; font-size:.62rem; color:var(--dim); text-align:right; }
+    padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; background:rgba(6,11,20,.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  header .mini { width:30px; height:30px; border-radius:50%; border:1.5px solid var(--cyan); position:relative; box-shadow:0 0 12px rgba(53,214,255,.5); flex:none; }
+  header .mini::after { content:""; position:absolute; inset:6px; border-radius:50%; border:1px solid var(--cyan-dim); }
+  header h1 { font-size:1rem; letter-spacing:.18em; color:var(--cyan); }
+  header .stand { margin-left:auto; font-size:.6rem; color:var(--dim); text-align:right; }
 
-  .panel { background:linear-gradient(180deg, rgba(53,214,255,.05), rgba(0,0,0,0) 30%), var(--panel);
-    border:1px solid var(--line); border-radius:1.1rem; margin:.8rem; padding:1rem; }
-  .panel h2 { font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--cyan);
-    border-bottom:1px solid var(--line); padding-bottom:.55rem; margin-bottom:.8rem; }
-  .badge { float:right; font-size:.6rem; letter-spacing:.15em; color:var(--ok);
-    border:1px solid var(--ok); border-radius:.35rem; padding:.1rem .4rem; }
-  .konto { text-align:center; padding:.4rem 0 1rem; }
-  .konto .label { color:var(--dim); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; }
+  .view { display:none; padding:.8rem; }
+  .view.aktiv { display:block; }
+  .panel { background:linear-gradient(180deg, rgba(53,214,255,.05), rgba(0,0,0,0) 30%), var(--panel); border:1px solid var(--line); border-radius:1.1rem; margin-bottom:.8rem; padding:1rem; }
+  .panel h2 { font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan); border-bottom:1px solid var(--line); padding-bottom:.5rem; margin-bottom:.8rem; }
+  .badge { float:right; font-size:.58rem; letter-spacing:.12em; color:var(--ok); border:1px solid var(--ok); border-radius:.35rem; padding:.1rem .4rem; }
+
+  /* Trading */
+  .konto { text-align:center; padding:.3rem 0 1rem; }
+  .konto .label { color:var(--dim); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; }
   .konto .wert { font-size:2.4rem; font-weight:700; margin-top:.2rem; }
   .konto .heute { font-size:.95rem; margin-top:.3rem; }
-  .gruen { color:var(--ok); } .rot { color:#ff5d6c; }
   .kennzahlen { display:flex; gap:.6rem; margin-bottom:.6rem; }
-  .kennzahlen .box { flex:1; background:#0a1422; border:1px solid var(--line); border-radius:.7rem;
-    padding:.6rem .7rem; text-align:center; }
-  .kennzahlen .box .k-label { color:var(--dim); font-size:.68rem; }
-  .kennzahlen .box .k-wert { font-size:1.15rem; font-weight:700; margin-top:.2rem; }
-  .pos { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0;
-    border-bottom:1px dashed rgba(21,50,77,.6); }
-  .pos:last-child { border-bottom:none; }
-  .pos .name { font-weight:600; } .pos .pct { font-weight:700; font-size:1.05rem; }
+  .kennzahlen .box { flex:1; background:#0a1422; border:1px solid var(--line); border-radius:.7rem; padding:.6rem; text-align:center; }
+  .kennzahlen .box .k-label { color:var(--dim); font-size:.66rem; }
+  .kennzahlen .box .k-wert { font-size:1.1rem; font-weight:700; margin-top:.2rem; }
+  .zeile { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0; border-bottom:1px dashed rgba(21,50,77,.6); }
+  .zeile:last-child { border-bottom:none; }
+  .zeile .name { font-weight:600; } .zeile .pct { font-weight:700; font-size:1.02rem; }
+
+  /* Tagesplan */
+  .termin { display:flex; gap:.8rem; padding:.55rem 0; border-bottom:1px dashed rgba(21,50,77,.5); }
+  .termin:last-child { border-bottom:none; }
+  .termin .zeit { color:var(--cyan); font-weight:700; font-variant-numeric:tabular-nums; min-width:3.2rem; }
+  .art-pause .zeit,.art-frei .zeit { color:var(--dim); }
+  .aufgabe { display:flex; gap:.6rem; align-items:center; padding:.5rem 0; }
+  .aufgabe .kasten { width:1.1rem; height:1.1rem; border:1.5px solid var(--cyan-dim); border-radius:.3rem; flex:none; }
+  .aufgabe.erledigt .kasten { background:var(--ok); border-color:var(--ok); }
+  .aufgabe.erledigt span { text-decoration:line-through; color:var(--dim); }
+
+  /* Weltlage */
+  .markt { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.4rem; }
+  .markt .m { flex:1 1 45%; background:#0a1422; border:1px solid var(--line); border-radius:.6rem; padding:.5rem .7rem; font-size:.82rem; }
+  .markt .m b { display:block; color:var(--dim); font-size:.66rem; font-weight:500; }
+  .news .kat { color:var(--cyan); font-size:.7rem; letter-spacing:.05em; }
+  .news .titel { font-weight:700; margin:.1rem 0; }
+  .news .text { color:var(--text); font-size:.86rem; }
+  .news .quelle { color:var(--dim); font-size:.72rem; margin-top:.2rem; }
+
+  /* Chat */
+  #chatVerlauf { display:flex; flex-direction:column; gap:.5rem; margin-bottom:.7rem; }
+  .bubble { padding:.6rem .8rem; border-radius:.9rem; max-width:88%; font-size:.92rem; line-height:1.45; white-space:pre-wrap; }
+  .bubble.ich { align-self:flex-end; background:var(--cyan); color:#04141c; border-bottom-right-radius:.2rem; }
+  .bubble.jarvis { align-self:flex-start; background:#0a1422; border:1px solid var(--line); border-bottom-left-radius:.2rem; }
+  .chat-eingabe { display:flex; gap:.5rem; }
+  .chat-eingabe input { flex:1; padding:.8rem; background:#0a1422; border:1px solid var(--line); border-radius:.7rem; color:var(--text); font-size:1rem; }
+  .chat-eingabe button { padding:.8rem 1rem; background:var(--cyan); color:#04141c; border:none; border-radius:.7rem; font-weight:700; cursor:pointer; }
+  .hinweis-box { background:#0a1422; border:1px solid var(--warn); border-radius:.7rem; padding:.8rem; font-size:.85rem; color:var(--text); }
+  .hinweis-box input { width:100%; margin-top:.5rem; padding:.6rem; background:#060b14; border:1px solid var(--line); border-radius:.5rem; color:var(--text); }
+  .hinweis-box button { margin-top:.5rem; padding:.6rem 1rem; background:var(--cyan); color:#04141c; border:none; border-radius:.5rem; font-weight:700; cursor:pointer; }
+
+  /* Untere Navigation */
+  nav { position:fixed; bottom:0; left:0; right:0; z-index:20; display:flex; background:rgba(6,11,20,.95);
+    backdrop-filter:blur(10px); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; background:none; border:none; color:var(--dim); padding:.55rem 0 .5rem; cursor:pointer; font-family:inherit; }
+  nav button .ico { font-size:1.25rem; display:block; }
+  nav button .lbl { font-size:.6rem; letter-spacing:.03em; }
+  nav button.aktiv { color:var(--cyan); }
 </style>
 </head>
 <body>
@@ -71,7 +103,7 @@
     <div class="reaktor"></div>
     <h1>J.A.R.V.I.S.</h1>
     <p>Private Ansicht · bitte Passwort eingeben</p>
-    <input id="pw" type="password" inputmode="text" placeholder="Passwort" autocomplete="current-password">
+    <input id="pw" type="password" placeholder="Passwort" autocomplete="current-password">
     <button id="btn">🔓 Entsperren</button>
     <div class="fehler" id="fehler"></div>
   </div>
@@ -79,67 +111,209 @@
   <div id="app">
     <header>
       <div class="mini"></div>
-      <h1>DEPOT</h1>
+      <h1 id="kopf">ÜBERSICHT</h1>
       <div class="stand" id="stand"></div>
     </header>
-    <section class="panel">
-      <h2>📊 Trading <span class="badge">PAPER · LIVE</span></h2>
-      <div class="konto">
-        <div class="label">Kontostand</div>
-        <div class="wert" id="kontostand"></div>
-        <div class="heute" id="kontoHeute"></div>
+
+    <!-- ÜBERSICHT -->
+    <section class="view aktiv" data-view="uebersicht">
+      <div class="panel">
+        <h2>💰 Depot</h2>
+        <div class="konto"><div class="wert" id="u-konto"></div><div class="heute" id="u-heute"></div></div>
       </div>
-      <div class="kennzahlen">
-        <div class="box"><div class="k-label">Gesamt-Rendite</div><div class="k-wert" id="rendite"></div></div>
-        <div class="box"><div class="k-label">Positionen</div><div class="k-wert" id="anzahl"></div></div>
-      </div>
-      <div id="posListe"></div>
+      <div class="panel"><h2>📋 Heute</h2><div id="u-heute-plan"></div></div>
+      <div class="panel"><h2>🌍 Schlagzeile</h2><div id="u-news"></div></div>
     </section>
+
+    <!-- TRADING -->
+    <section class="view" data-view="trading">
+      <div class="panel">
+        <h2>📊 Trading <span class="badge">PAPER · LIVE</span></h2>
+        <div class="konto"><div class="label">Kontostand</div><div class="wert" id="t-konto"></div><div class="heute" id="t-heute"></div></div>
+        <div class="kennzahlen">
+          <div class="box"><div class="k-label">Gesamt-Rendite</div><div class="k-wert" id="t-rendite"></div></div>
+          <div class="box"><div class="k-label">Positionen</div><div class="k-wert" id="t-anzahl"></div></div>
+        </div>
+        <div id="t-pos"></div>
+      </div>
+    </section>
+
+    <!-- TAGESPLAN -->
+    <section class="view" data-view="plan">
+      <div class="panel"><h2>🗓️ Tagesplan</h2><div class="dim" id="p-fokus" style="margin-bottom:.6rem;font-size:.86rem"></div><div id="p-termine"></div></div>
+      <div class="panel"><h2>✅ Aufgaben</h2><div id="p-aufgaben"></div></div>
+    </section>
+
+    <!-- WELTLAGE -->
+    <section class="view" data-view="welt">
+      <div class="panel"><h2>📈 Märkte</h2><div class="markt" id="w-markt"></div></div>
+      <div class="panel"><h2>🌍 Wichtigste Ereignisse</h2><div id="w-news"></div></div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" data-view="chat">
+      <div class="panel">
+        <h2>💬 Frag Jarvis</h2>
+        <div id="chatVerlauf"></div>
+        <div id="chatSetup"></div>
+        <div class="chat-eingabe" id="chatEingabe" style="display:none">
+          <input id="chatInput" placeholder="Frag mich etwas…" autocomplete="off">
+          <button id="chatSend">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <nav>
+      <button class="aktiv" data-ziel="uebersicht"><span class="ico">🏠</span><span class="lbl">Übersicht</span></button>
+      <button data-ziel="trading"><span class="ico">📊</span><span class="lbl">Trading</span></button>
+      <button data-ziel="plan"><span class="ico">🗓️</span><span class="lbl">Tag</span></button>
+      <button data-ziel="welt"><span class="ico">🌍</span><span class="lbl">Welt</span></button>
+      <button data-ziel="chat"><span class="ico">💬</span><span class="lbl">Chat</span></button>
+    </nav>
   </div>
 
 <script>
-const ITER = 200000; // muss mit tresor-bauen.py übereinstimmen
+const ITER = 200000;
+const CHAT_MODELL = "claude-sonnet-4-6";   // kann später geändert werden
 const $ = id => document.getElementById(id);
 const b64ToBytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+let DATEN = {};
 
+const proz = n => (n >= 0 ? "+" : "") + Number(n).toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1}) + " %";
+const farbe = n => n >= 0 ? "gruen" : "rot";
+
+/* ---------- Entsperren ---------- */
 async function entsperren() {
   $("fehler").textContent = "";
   const pw = $("pw").value;
   if (!pw) { $("fehler").textContent = "Bitte Passwort eingeben."; return; }
   try {
-    const tresor = await (await fetch("tresor.json", { cache: "no-store" })).json();
-    const salt = b64ToBytes(tresor.salt), iv = b64ToBytes(tresor.iv), ct = b64ToBytes(tresor.ct);
-    const basis = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw),
-      "PBKDF2", false, ["deriveKey"]);
+    const tr = await (await fetch("tresor.json",{cache:"no-store"})).json();
+    const basis = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
     const key = await crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt, iterations: tresor.iter || ITER, hash: "SHA-256" },
-      basis, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-    const klar = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-    const t = JSON.parse(new TextDecoder().decode(klar));
-    zeige(t);
+      {name:"PBKDF2", salt:b64ToBytes(tr.salt), iterations:tr.iter||ITER, hash:"SHA-256"},
+      basis, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+    const klar = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64ToBytes(tr.iv)}, key, b64ToBytes(tr.ct));
+    DATEN = JSON.parse(new TextDecoder().decode(klar));
+    $("tor").style.display = "none";
+    $("app").style.display = "block";
+    rendern();
   } catch (e) {
     $("fehler").textContent = "Falsches Passwort oder noch keine Daten hinterlegt.";
   }
 }
 
-function zeige(t) {
-  const proz = n => (n >= 0 ? "+" : "") + n.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
-  const farbe = n => n >= 0 ? "gruen" : "rot";
-  const geld = n => n.toLocaleString("de-DE", { style: "currency", currency: t.waehrung || "EUR", maximumFractionDigits: 0 });
-  const posZeile = (titel, p) =>
-    `<div class="pos"><div><div class="name">${titel}: ${p.name}</div></div><div class="pct ${farbe(p.pct)}">${proz(p.pct)}</div></div>`;
-  $("kontostand").textContent = geld(t.kontostand);
-  $("kontoHeute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
-  $("rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
-  $("anzahl").textContent = t.anzahlPositionen;
-  $("posListe").innerHTML = posZeile("🏆 Beste", t.beste) + posZeile("📉 Schwächste", t.schlechteste);
-  $("stand").textContent = t.aktualisiert ? "Stand " + t.aktualisiert : "";
-  $("tor").style.display = "none";
-  $("app").style.display = "block";
+/* ---------- Anzeigen ---------- */
+function rendern() {
+  const t = DATEN.trading, p = DATEN.plan, w = DATEN.weltlage;
+  if (t) {
+    const geld = n => Number(n).toLocaleString("de-DE",{style:"currency",currency:t.waehrung||"EUR",maximumFractionDigits:0});
+    $("t-konto").textContent = $("u-konto").textContent = geld(t.kontostand);
+    $("t-heute").innerHTML = $("u-heute").innerHTML = `<span class="${farbe(t.heuteProzent)}">${proz(t.heuteProzent)} heute</span>`;
+    $("t-rendite").innerHTML = `<span class="${farbe(t.renditeProzent)}">${proz(t.renditeProzent)}</span>`;
+    $("t-anzahl").textContent = t.anzahlPositionen;
+    const pz = (titel,x) => `<div class="zeile"><div class="name">${titel}: ${x.name}</div><div class="pct ${farbe(x.pct)}">${proz(x.pct)}</div></div>`;
+    $("t-pos").innerHTML = pz("🏆 Beste", t.beste) + pz("📉 Schwächste", t.schlechteste);
+    $("stand").textContent = t.aktualisiert ? "Stand "+t.aktualisiert : "";
+  }
+  if (p) {
+    $("p-fokus").textContent = p.fokus || "";
+    $("p-termine").innerHTML = (p.termine||[]).map(x =>
+      `<div class="termin art-${x.art||''}"><div class="zeit">${x.zeit}</div><div>${x.titel}</div></div>`).join("");
+    const auf = (p.aufgaben||[]).map(a =>
+      `<div class="aufgabe ${a.erledigt?'erledigt':''}"><div class="kasten"></div><span>${a.text}</span></div>`).join("");
+    $("p-aufgaben").innerHTML = auf || '<div class="dim">Keine Aufgaben.</div>';
+    // Übersicht: nächster Termin + Fokus
+    const naechste = (p.termine||[]).slice(0,3).map(x=>`<div class="termin"><div class="zeit">${x.zeit}</div><div>${x.titel}</div></div>`).join("");
+    $("u-heute-plan").innerHTML = (p.fokus?`<div class="dim" style="margin-bottom:.5rem;font-size:.85rem">${p.fokus}</div>`:"") + naechste;
+  }
+  if (w) {
+    const m = w.maerkte||{};
+    $("w-markt").innerHTML = [["S&P 500",m.sp500],["Nasdaq",m.nasdaq],["Dow",m.dow],["Bitcoin",m.bitcoin]]
+      .filter(x=>x[1]).map(x=>`<div class="m"><b>${x[0]}</b>${x[1]}</div>`).join("");
+    const news = w.schlagzeilen||[];
+    $("w-news").innerHTML = news.map(n =>
+      `<div class="news panel" style="margin:0 0 .6rem;background:#0a1422"><div class="kat">${n.kategorie||""}</div><div class="titel">${n.titel}</div><div class="text">${n.text}</div><div class="quelle">Quelle: ${n.quelle||"–"}</div></div>`).join("");
+    if (news[0]) $("u-news").innerHTML = `<div class="news"><div class="kat">${news[0].kategorie||""}</div><div class="titel">${news[0].titel}</div><div class="text">${news[0].text}</div></div>`;
+  }
+  chatSetupPruefen();
+}
+
+/* ---------- Navigation ---------- */
+const titel = {uebersicht:"ÜBERSICHT", trading:"TRADING", plan:"TAGESPLAN", welt:"WELTLAGE", chat:"FRAG JARVIS"};
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  const ziel = b.dataset.ziel;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("aktiv", x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("aktiv", v.dataset.view===ziel));
+  $("kopf").textContent = titel[ziel];
+  window.scrollTo(0,0);
+}));
+
+/* ---------- Chat mit Jarvis (über deinen eigenen API-Schlüssel) ---------- */
+function chatSetupPruefen() {
+  const key = localStorage.getItem("jarvis_api_key");
+  if (key) {
+    $("chatSetup").innerHTML = "";
+    $("chatEingabe").style.display = "flex";
+  } else {
+    $("chatEingabe").style.display = "none";
+    $("chatSetup").innerHTML =
+      `<div class="hinweis-box">🔑 <b>Einmal einrichten:</b> Damit Jarvis hier antworten kann, brauchst du einen Anthropic-API-Schlüssel (von console.anthropic.com). Er wird nur in diesem Browser gespeichert.
+       <input id="keyInput" type="password" placeholder="sk-ant-…">
+       <button id="keySave">Speichern</button></div>`;
+    $("keySave").addEventListener("click", () => {
+      const v = $("keyInput").value.trim();
+      if (v) { localStorage.setItem("jarvis_api_key", v); chatSetupPruefen(); }
+    });
+  }
+}
+
+function bubble(text, wer) {
+  const d = document.createElement("div");
+  d.className = "bubble " + wer;
+  d.textContent = text;
+  $("chatVerlauf").appendChild(d);
+  d.scrollIntoView({behavior:"smooth", block:"end"});
+  return d;
+}
+
+const verlauf = [];
+async function fragen() {
+  const key = localStorage.getItem("jarvis_api_key");
+  const text = $("chatInput").value.trim();
+  if (!text || !key) return;
+  $("chatInput").value = "";
+  bubble(text, "ich");
+  verlauf.push({role:"user", content:text});
+  const warte = bubble("…", "jarvis");
+
+  const t = DATEN.trading || {};
+  const kontext = `Du bist J.A.R.V.I.S., der persönliche Assistent von Constantin. Antworte auf Deutsch, freundlich, kurz und hilfreich. `+
+    `Kontext (Paper-Depot): Kontostand ${t.kontostand||"?"} ${t.waehrung||""}, heute ${t.heuteProzent||0}%, Rendite ${t.renditeProzent||0}%. `+
+    `Bei Finanzfragen: keine Anlageberatung, nur Einschätzung. Wenn du etwas nicht sicher weißt, sag es ehrlich.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{ "content-type":"application/json", "x-api-key":key,
+        "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+      body: JSON.stringify({ model:CHAT_MODELL, max_tokens:800, system:kontext, messages:verlauf })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || "Fehler");
+    const antwort = (data.content||[]).map(c=>c.text||"").join("").trim() || "(keine Antwort)";
+    warte.textContent = antwort;
+    verlauf.push({role:"assistant", content:antwort});
+  } catch (e) {
+    warte.textContent = "⚠️ " + (e.message.includes("authentication") ? "Schlüssel ungültig – bitte neu eingeben." : e.message);
+    warte.classList.add("rot");
+  }
 }
 
 $("btn").addEventListener("click", entsperren);
-$("pw").addEventListener("keydown", e => { if (e.key === "Enter") entsperren(); });
+$("pw").addEventListener("keydown", e => { if (e.key==="Enter") entsperren(); });
+$("chatSend").addEventListener("click", fragen);
+$("chatInput").addEventListener("keydown", e => { if (e.key==="Enter") fragen(); });
 </script>
 </body>
 </html>
